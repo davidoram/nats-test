@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/davidoram/nats-test/encoding/data"
 	"github.com/nats-io/nats.go"
 )
 
@@ -21,19 +22,12 @@ func main() {
 	}
 	defer ec.Close()
 
-	// Define the object
-	type person struct {
-		Firstname string
-		Surname   string
+	for {
+		a := data.Answer{}
+		// Publish the message
+		if err := ec.Request("hello", &data.Person{Firstname: "Dave", Surname: "Oram"}, &a, time.Second*1); err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("Reply: %+v", a)
 	}
-
-	type answer struct {
-		Msg string
-	}
-	a := answer{}
-	// Publish the message
-	if err := ec.Request("hello", &person{Firstname: "Dave", Surname: "Oram"}, &a, time.Second*1); err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Reply: %+v", a)
 }

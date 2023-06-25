@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/davidoram/nats-test/encoding/data"
 	"github.com/nats-io/nats.go"
 )
 
@@ -25,22 +26,12 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	// Define the object
-	type person struct {
-		Firstname string
-		Surname   string
-	}
-
-	type answer struct {
-		Msg string
-	}
-
 	msgCnt := 0
 	// Create a queue subscription on "updates" with queue name "workers"
-	if _, err := ec.QueueSubscribe("hello", "hello-workers", func(subject, reply string, p *person) {
+	if _, err := ec.QueueSubscribe("hello", "hello-workers", func(subject, reply string, p *data.Person) {
 		log.Printf("Got %+v", p)
 
-		a := answer{Msg: fmt.Sprintf("Hello %s %s", p.Firstname, p.Surname)}
+		a := data.Answer{Msg: fmt.Sprintf("Hello %s %s. count %d", p.Firstname, p.Surname, msgCnt)}
 		err = ec.Publish(reply, a)
 		if err != nil {
 			log.Fatal(err)
